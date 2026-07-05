@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+<div id="cd" style="padding: 1rem 0;"></div>
+<script type="module">
+import mermaid from 'https://esm.sh/mermaid@11/dist/mermaid.esm.min.mjs';
+const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+await document.fonts.ready;
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'base',
+  fontFamily: '"Anthropic Sans", sans-serif',
+  themeVariables: {
+    darkMode: dark,
+    fontSize: '13px',
+    fontFamily: '"Anthropic Sans", sans-serif',
+    lineColor: dark ? '#9c9a92' : '#73726c',
+    textColor: dark ? '#c2c0b6' : '#3d3d3a',
+  },
+});
+
+const diagram = `classDiagram
+  class User {
+    +UUID id
+    +String fullName
+    +String email
+    +String passwordHash
+    +String role
+    +DateTime createdAt
+    +register() bool
+    +login() bool
+    +logout() void
+    +resetPassword() void
+  }
+
+  class Farm {
+    +UUID id
+    +UUID userId
+    +String farmName
+    +String location
+    +DateTime createdAt
+    +create() Farm
+    +update() Farm
+    +delete() void
+    +getPonds() List~Pond~
+  }
+
+  class Pond {
+    +UUID id
+    +UUID farmId
+    +String pondName
+    +String pondType
+    +Float sizeM2
+    +String species
+    +Date stockingDate
+    +Int fingerlingsCount
+    +create() Pond
+    +update() Pond
+    +delete() void
+    +getWaterQualityLogs() List~WaterQualityLog~
+    +getFeedLogs() List~FeedLog~
+  }
+
+  class WaterQualityLog {
+    +UUID id
+    +UUID pondId
+    +Date logDate
+    +Float ph
+    +Float temperatureC
+    +Float dissolvedOxygen
+    +String notes
+    +create() WaterQualityLog
+    +update() WaterQualityLog
+    +delete() void
+    +getHistory() List~WaterQualityLog~
+  }
+
+  class FeedLog {
+    +UUID id
+    +UUID pondId
+    +Date logDate
+    +String feedType
+    +Float quantityKg
+    +Float costKes
+    +create() FeedLog
+    +update() FeedLog
+    +delete() void
+    +getSummary() Map
+  }
+
+  class Expense {
+    +UUID id
+    +UUID farmId
+    +Date expenseDate
+    +String category
+    +String description
+    +Float amountKes
+    +create() Expense
+    +update() Expense
+    +delete() void
+  }
+
+  class Sale {
+    +UUID id
+    +UUID farmId
+    +UUID pondId
+    +Date saleDate
+    +Float weightKg
+    +Float pricePerKg
+    +Float totalKes
+    +String buyer
+    +create() Sale
+    +update() Sale
+    +delete() void
+    +calcTotal() Float
+  }
+
+  class Dashboard {
+    +UUID userId
+    +getActivePonds() List~Pond~
+    +getLatestWaterReadings() List~WaterQualityLog~
+    +getFinancialSummary() Map
+    +getFeedSummary() Map
+  }
+
+  User "1" --> "0..*" Farm : owns
+  Farm "1" --> "0..*" Pond : contains
+  Pond "1" --> "0..*" WaterQualityLog : logs
+  Pond "1" --> "0..*" FeedLog : logs
+  Farm "1" --> "0..*" Expense : records
+  Farm "1" --> "0..*" Sale : records
+  Pond "1" --> "0..*" Sale : linked to
+  Dashboard ..> Farm : uses
+  Dashboard ..> Pond : uses
+  Dashboard ..> WaterQualityLog : uses
+  Dashboard ..> Sale : uses
+  Dashboard ..> Expense : uses
+`;
+
+const { svg } = await mermaid.render('cd-svg', diagram);
+document.getElementById('cd').innerHTML = svg;
+</script>
