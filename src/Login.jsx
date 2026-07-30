@@ -7,7 +7,8 @@ import {
   createUserWithEmailAndPassword,
   RecaptchaVerifier 
 } from "./firebase/firebase";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { createUserProfile, getUserProfile } from "./services/userService";
 
 function Login() {
   const navigate = useNavigate();
@@ -25,6 +26,16 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
+
+  // Send the user to the dashboard matching their role, creating the profile
+  // document on first login.
+  const redirectByRole = async (currentUser) => {
+    let profile = await getUserProfile(currentUser.uid);
+    if (!profile) {
+      profile = await createUserProfile(currentUser);
+    }
+    navigate(profile.role === "admin" ? "/admin/dashboard" : "/dashboard");
+  };
 
   // Setup reCAPTCHA (for phone auth)
   const setupRecaptcha = () => {
@@ -74,8 +85,8 @@ function Login() {
     setLoading(true);
 
     try {
-      await confirmationResultRef.current.confirm(otp);
-      navigate("/dashboard");
+      const credential = await confirmationResultRef.current.confirm(otp);
+      await redirectByRole(credential.user);
     } catch (err) {
       setError("Invalid OTP. Please try again.");
     }
@@ -89,8 +100,8 @@ function Login() {
     setLoading(true);
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      navigate("/dashboard");
+      const credential = await signInWithEmailAndPassword(auth, email, password);
+      await redirectByRole(credential.user);
     } catch (err) {
       if (err.code === "auth/user-not-found") {
         setError("No account found with this email. Please sign up.");
@@ -110,7 +121,8 @@ function Login() {
     setLoading(true);
 
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const credential = await createUserWithEmailAndPassword(auth, email, password);
+      await createUserProfile(credential.user);
       navigate("/dashboard");
     } catch (err) {
       if (err.code === "auth/email-already-in-use") {
@@ -301,7 +313,13 @@ function Login() {
           </>
         )}
 
-        <div className="mt-6 text-center text-xs text-gray-400">
+        <div className="mt-6 text-center">
+          <Link to="/admin-login" className="text-sm text-purple-600 hover:text-purple-700 font-medium">
+            👑 Administrator login
+          </Link>
+        </div>
+
+        <div className="mt-4 text-center text-xs text-gray-400">
           Secure authentication powered by Firebase 🔒
         </div>
       </div>

@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import fishBg from './assets/fish-background.jpg';
 
 function LandingPage() {
@@ -30,12 +31,19 @@ function LandingPage() {
           <a href="#" className="hover:text-green-600 transition">Contact Us</a>
         </div>
 
-        {/* Get Started Button */}
-        <a href="/login">
-          <button className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition shadow-md hover:shadow-lg">
-            Get Started
-          </button>
-        </a>
+        {/* Login Buttons */}
+        <div className="flex items-center gap-4">
+          <Link to="/login">
+            <button className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition shadow-md hover:shadow-lg">
+              Farmer Login
+            </button>
+          </Link>
+          <Link to="/admin-login">
+            <button className="border-2 border-purple-600 text-purple-600 px-6 py-2 rounded-lg hover:bg-purple-50 transition">
+              Admin Login
+            </button>
+          </Link>
+        </div>
       </nav>
 
       {/* Hero Section */}
